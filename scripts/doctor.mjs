@@ -25,19 +25,17 @@ const REQUIRED_PNPM_MAJOR = 9;
 const REQUIRED_PYTHON_MINOR = 11; // 3.11+
 
 // Required B2 env vars + the exact placeholder strings shipped in
-// .env.example. Keep in sync with services/api/main.py REQUIRED_B2_SETTINGS
-// and PLACEHOLDER_VALUES.
+// .env.example. Keep in sync with services/api/main.py REQUIRED_B2_SETTINGS,
+// PLACEHOLDER_VALUES, and the optional public URL base setting.
 const REQUIRED_B2_VARS = [
-  "B2_ENDPOINT",
   "B2_REGION",
-  "B2_KEY_ID",
+  "B2_APPLICATION_KEY_ID",
   "B2_APPLICATION_KEY",
   "B2_BUCKET_NAME",
 ];
 const PLACEHOLDERS = new Set([
-  "your_b2_endpoint",
   "your_b2_region",
-  "your_key_id",
+  "your_application_key_id",
   "your_application_key",
   "your-bucket-name",
 ]);
