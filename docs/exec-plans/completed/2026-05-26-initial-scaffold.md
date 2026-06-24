@@ -1,7 +1,7 @@
 # Scaffold plan — `ai-meeting-notes`
 
 > **Source of truth for this build:** the freshly-cloned tree at
-> `.claude/scratch/vcsk-568cf222-7f5b-4016-9a64-24ba448db5da/`. The user
+> `.claude/scratch/<source-tree>/`. The user
 > overrode the default `vibe-coding-starter-kit` with
 > **`ai-audio-starter-kit`** (`https://github.com/backblaze-b2-samples/ai-audio-starter-kit`),
 > because this sample is fundamentally an AI-audio app and that starter
@@ -126,7 +126,7 @@ plumbing rather than rebuild it.
 
 Kept from starter:
 ```
-B2_ENDPOINT, B2_REGION, B2_KEY_ID, B2_APPLICATION_KEY, B2_BUCKET_NAME, B2_PUBLIC_URL
+B2_REGION, B2_APPLICATION_KEY_ID, B2_APPLICATION_KEY, B2_BUCKET_NAME, B2_PUBLIC_URL_BASE
 ```
 
 Added:
@@ -190,7 +190,7 @@ same client.
 
 **No b2-native usage.** **All `boto3.client("s3", …)` calls go through
 the cached factory in `repo/b2_client.py`, which sets
-`Config(user_agent_extra="b2ai-ai-meeting-notes", signature_version="s3v4")`**.
+`Config(user_agent_extra="b2ai-ai-meeting-notes (backblaze-b2-samples)", signature_version="s3v4")`**.
 
 ---
 
@@ -260,7 +260,7 @@ the cached factory in `repo/b2_client.py`, which sets
 | pnpm workspace name (shared) | `@ai-audio-starter-kit/shared` | `@ai-meeting-notes/shared` |
 | Title case in docs / UI | "AI Audio Starter Kit" | "AI Meeting Notes" |
 | Tagline | "Build AI audio applications…" | "Record, transcribe, summarize, and search your meetings — stored on Backblaze B2" |
-| `user_agent_extra` value | `b2ai-ai-audio-starter-kit` | `b2ai-ai-meeting-notes` |
+| `user_agent_extra` value | `b2ai-ai-audio-starter-kit` | `b2ai-ai-meeting-notes (backblaze-b2-samples)` |
 | UTM `utm_content` query param | `b2ai-ai-audio-starter-kit` | `b2ai-ai-meeting-notes` |
 | Railway service slugs in `infra/railway/` | `ai-audio-starter-kit-*` | `ai-meeting-notes-*` |
 | Docker image tag references (if any in infra) | `ai-audio-starter-kit:*` | `ai-meeting-notes:*` |
@@ -314,7 +314,7 @@ Each gets a stub exec-plan so the path is discoverable.
 ## 9. Build instructions for the b2-sample-builder
 
 1. **Source tree.** Use ONLY
-   `.claude/scratch/vcsk-568cf222-7f5b-4016-9a64-24ba448db5da/`. Do not
+   `.claude/scratch/<source-tree>/`. Do not
    clone again. Do not read any sibling `ai-audio-starter-kit/` checkout.
 2. **Strip git history** when copying.
 3. **Apply the rename table in §6 globally** before adding new modules,
@@ -330,7 +330,7 @@ Each gets a stub exec-plan so the path is discoverable.
 7. **Verify parent-CLAUDE.md standards** before commit:
    - S3 API only, no b2-native calls
    - Every `boto3.client("s3", …)` sets
-     `user_agent_extra="b2ai-ai-meeting-notes"`
+     `user_agent_extra="b2ai-ai-meeting-notes (backblaze-b2-samples)"`
    - All env vars named `B2_*` for B2 config; provider keys live in their
      own `ASSEMBLYAI_API_KEY` / `OPENAI_API_KEY` / `ANTHROPIC_API_KEY`
      namespace

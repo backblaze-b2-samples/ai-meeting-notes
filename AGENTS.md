@@ -1,4 +1,4 @@
-<!-- last_verified: 2026-05-26 -->
+<!-- last_verified: 2026-06-24 -->
 # AGENTS.md
 
 This is the authoritative control surface for all coding agents on the
@@ -54,7 +54,7 @@ infra/railway/                             Deployment config
 
 **B2 bundle layout**: every meeting lives under `meetings/<meeting-id>/`, containing exactly `recording.<ext>`, `status.json`, `transcript.json`, `summary.json`, and `actions.json`. Meeting ids match `^[A-Za-z0-9_-]{6,64}$` (see `repo/meetings_store.py::MEETING_ID_RE`); `..` / `/` are explicitly rejected at the service boundary before any B2 call. The full-bucket explorer at `/files` is the secondary surface — it shows the per-meeting bundles next to anything else in the bucket.
 
-**B2 surface**: S3-only. No `b2-native` calls anywhere. Every `boto3.client("s3", …)` instantiation MUST pass `Config(user_agent_extra="b2ai-ai-meeting-notes", signature_version="s3v4")`. No hardcoded region strings in source (use `B2_REGION` from `.env`).
+**B2 surface**: S3-only. No `b2-native` calls anywhere. Every `boto3.client("s3", …)` instantiation MUST pass `Config(user_agent_extra="b2ai-ai-meeting-notes (backblaze-b2-samples)", signature_version="s3v4")`. No hardcoded region strings in source (use `B2_REGION` from `.env`).
 
 **Pipeline state**: `status.json` is the source of truth. Each pipeline stage rewrites it *before* doing its work, so a UI poll right after upload always finds something and progress is observable without reading the large transcript.
 
