@@ -28,16 +28,22 @@ def _split_key(key: str) -> tuple[str, str]:
 
 def _public_url(key: str) -> str | None:
     """Build a public URL for an object key, percent-encoding the path."""
-    if not settings.b2_public_url_base:
+    base_url = settings.b2_public_url_base.rstrip("/")
+    if not base_url:
         return None
-    return f"{settings.b2_public_url_base}/{quote(key, safe='/')}"
+    return f"{base_url}/{quote(key, safe='/')}"
 
 
 @functools.lru_cache(maxsize=1)
 def get_s3_client():
+    endpoint_url = settings.b2_s3_endpoint
+    if not endpoint_url:
+        raise RuntimeError(
+            "B2_REGION is required before creating the B2 S3 client."
+        )
     return boto3.client(
         "s3",
-        endpoint_url=settings.b2_s3_endpoint,
+        endpoint_url=endpoint_url,
         region_name=settings.b2_region or None,
         aws_access_key_id=settings.b2_application_key_id,
         aws_secret_access_key=settings.b2_application_key,
