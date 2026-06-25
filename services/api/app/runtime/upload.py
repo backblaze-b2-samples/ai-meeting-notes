@@ -21,24 +21,26 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+INVALID_CONTENT_LENGTH = "Invalid Content-Length header"
+
+
 def _parse_content_length(header: str | None) -> int | None:
     if header is None:
         return None
 
-    try:
-        content_length = int(header)
-    except ValueError:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid Content-Length header",
-        ) from None
+    if not header.isascii() or not header.isdigit():
+        raise UploadError(INVALID_CONTENT_LENGTH)
 
-    if content_length < 0:
-        raise HTTPException(
-            status_code=400,
-            detail="Invalid Content-Length header",
-        )
-    return content_length
+    return int(header)
+
+
+def _reject_upload(error: UploadError) -> None:
+    logger.warning("Upload rejected: %s", error.detail)
+    record_upload(success=False)
+    raise HTTPException(
+        status_code=error.status_code,
+        detail=error.detail,
+    ) from None
 
 
 @router.post("/upload", response_model=FileUploadResponse)
@@ -46,21 +48,21 @@ async def upload(
     background_tasks: BackgroundTasks, request: Request, file: UploadFile
 ):
     content_type = file.content_type or "application/octet-stream"
-    content_length = _parse_content_length(request.headers.get("content-length"))
-
-    chunks: list[bytes] = []
-    total = 0
-    while True:
-        chunk = await file.read(1024 * 1024)
-        if not chunk:
-            break
-        total += len(chunk)
-        if total > settings.max_file_size:
-            raise HTTPException(status_code=413, detail="File too large")
-        chunks.append(chunk)
-    file_data = b"".join(chunks)
-
     try:
+        content_length = _parse_content_length(request.headers.get("content-length"))
+
+        chunks: list[bytes] = []
+        total = 0
+        while True:
+            chunk = await file.read(1024 * 1024)
+            if not chunk:
+                break
+            total += len(chunk)
+            if total > settings.max_file_size:
+                raise HTTPException(status_code=413, detail="File too large")
+            chunks.append(chunk)
+        file_data = b"".join(chunks)
+
         meeting, response = process_meeting_upload(
             file_data=file_data,
             filename=file.filename or "",
@@ -68,9 +70,7 @@ async def upload(
             content_length=content_length,
         )
     except UploadError as e:
-        logger.warning("Upload rejected: %s", e.detail)
-        record_upload(success=False)
-        raise HTTPException(status_code=e.status_code, detail=e.detail) from None
+        _reject_upload(e)
 
     background_tasks.add_task(run_pipeline, meeting.meeting_id, file_data)
     record_upload(success=True)
