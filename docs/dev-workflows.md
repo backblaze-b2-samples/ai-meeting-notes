@@ -1,4 +1,4 @@
-<!-- last_verified: 2026-05-27 -->
+<!-- last_verified: 2026-06-25 -->
 # Dev Workflows
 
 Engineering workflows for this repo.
@@ -77,7 +77,8 @@ The orchestrator in `services/api/app/service/pipeline.py` is a linear `_run_<st
 - Frontend typecheck: `pnpm typecheck`
 - Frontend lint: `pnpm lint`
 - Backend lint: `pnpm lint:api`
-- Full suite: `pnpm typecheck && pnpm lint && pnpm lint:api && pnpm test:api && pnpm check:structure`
+- Doctor parser tests: `pnpm test:doctor`
+- Full suite: `pnpm typecheck && pnpm lint && pnpm lint:api && pnpm test:api && pnpm test:doctor && pnpm check:structure`
 - E2E: `pnpm test:e2e` (run `pnpm --filter @ai-meeting-notes/web exec playwright install chromium` once first)
 
 ### When to run

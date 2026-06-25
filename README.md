@@ -66,17 +66,23 @@ cp .env.example .env
 
 Open `.env` in your editor. Then head to the [Backblaze B2 dashboard](https://secure.backblaze.com/b2_buckets.htm?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=b2ai-ai-meeting-notes) and:
 
-1. **Create a bucket.** B2 will show three values — paste each into `.env`:
+1. **Create a bucket.** B2 will show two values — paste each into `.env`:
    - **Bucket Unique Name** -> `B2_BUCKET_NAME`
-   - **Endpoint** -> `B2_ENDPOINT`
-   - **Region** (the path segment of the endpoint, e.g. `us-west-004`) -> `B2_REGION`
+   - **Region** (for example, `us-west-004`) -> `B2_REGION`
 2. **Create an application key** with `Read and Write` permission. Paste into `.env`:
-   - **keyID** -> `B2_KEY_ID`
+   - **keyID** -> `B2_APPLICATION_KEY_ID`
    - **applicationKey** -> `B2_APPLICATION_KEY` *(only shown once — paste it now)*
-3. **Add your transcription + LLM keys** to `.env`:
+3. **Optional public URLs**: if your bucket is public or fronted by a CDN, set
+   `B2_PUBLIC_URL_BASE`; otherwise leave it blank and the app uses presigned URLs.
+4. **Add your transcription + LLM keys** to `.env`:
    - `ASSEMBLYAI_API_KEY` for transcription (<https://www.assemblyai.com/app/account>)
    - `OPENAI_API_KEY` for summary + action-item extraction (<https://platform.openai.com/api-keys>)
    - To use Anthropic Claude instead, uncomment the Anthropic block in `.env` and provide `ANTHROPIC_API_KEY` (<https://console.anthropic.com/>)
+
+Rolling upgrade note: if an existing deployment still uses the legacy
+`B2_KEY_ID` / `B2_ENDPOINT` names, add the standardized variables above
+alongside the legacy variables before deploying this version. After every old
+API instance is drained, remove the legacy variables.
 
 > Walkthrough? See [creating a bucket](https://www.backblaze.com/docs/cloud-storage-create-and-manage-buckets?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=b2ai-ai-meeting-notes) and [creating app keys](https://www.backblaze.com/docs/cloud-storage-create-and-manage-app-keys?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=b2ai-ai-meeting-notes).
 

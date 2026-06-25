@@ -1,5 +1,12 @@
 # Scaffold plan — `ai-meeting-notes`
 
+> **Historical scaffold plan.** This file records the initial build plan and
+> intentionally preserves decisions that were later superseded. Issue #2
+> replaced the B2 env-var, endpoint, user-agent, and rollout standards in this
+> document; use
+> `docs/exec-plans/completed/2026-06-25-b2-standards-issue-2.md` and
+> `AGENTS.md` for current B2 requirements.
+
 > **Source of truth for this build:** the freshly-cloned tree at
 > `.claude/scratch/vcsk-568cf222-7f5b-4016-9a64-24ba448db5da/`. The user
 > overrode the default `vibe-coding-starter-kit` with
@@ -123,6 +130,10 @@ plumbing rather than rebuild it.
   `SearchHit`, `SearchResponse`.
 
 **Env vars (`.env.example`)**
+
+> Historical note: issue #2 superseded this initial scaffold contract with the
+> current B2 standards. See
+> `docs/exec-plans/completed/2026-06-25-b2-standards-issue-2.md`.
 
 Kept from starter:
 ```

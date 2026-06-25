@@ -6,7 +6,10 @@ Security principles and implementation for the AI Meeting Notes sample.
 ## Trust Boundaries
 
 - **Frontend -> API**: CORS-restricted to configured origins, scoped to `GET/POST/DELETE/OPTIONS`
-- **API -> B2**: Authenticated via `B2_KEY_ID` + `B2_APPLICATION_KEY`, signature v4
+- **API -> B2**: Authenticated via `B2_APPLICATION_KEY_ID` + `B2_APPLICATION_KEY`, signature v4
+- **B2 region validation**: `B2_REGION` must match Backblaze's lowercase
+  region format before the API derives the outbound S3 endpoint; URL
+  metacharacters are rejected before any boto3 client is created.
 - **API -> AssemblyAI / OpenAI / Anthropic**: Bearer-token auth, keys held only in the API process env — never proxied to the client
 - **Client -> B2**: Presigned URLs for playback (inline) and download (`Content-Disposition: attachment`), 10-min expiry
 

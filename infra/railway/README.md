@@ -24,11 +24,11 @@ Set these on the API service:
 
 | Variable | Value | Required |
 |----------|-------|----------|
-| `B2_ENDPOINT` | Your B2 S3 endpoint | required |
-| `B2_REGION` | Your B2 region (the path segment of the endpoint, e.g. `us-west-004`) | required |
-| `B2_KEY_ID` | Your B2 key ID | required |
+| `B2_REGION` | Your B2 region, e.g. `us-west-004` | required |
+| `B2_APPLICATION_KEY_ID` | Your B2 key ID | required |
 | `B2_APPLICATION_KEY` | Your B2 key | required |
 | `B2_BUCKET_NAME` | Your bucket name | required |
+| `B2_PUBLIC_URL_BASE` | Public bucket or CDN base URL | optional |
 | `API_CORS_ORIGINS` | Your web service URL (e.g., `https://web-production-xxx.up.railway.app`) | required |
 | `ASSEMBLYAI_API_KEY` | AssemblyAI key — used for diarized transcription. | required |
 | `LLM_PROVIDER` | LLM provider for summary + action-item extraction. Default `openai`; alt `anthropic`. | optional |
@@ -36,6 +36,13 @@ Set these on the API service:
 | `OPENAI_MODEL` | Override the OpenAI model. Default `gpt-4o-mini`. | optional |
 | `ANTHROPIC_API_KEY` | Anthropic key — used for summary + action-item extraction when `LLM_PROVIDER=anthropic`. | required when `LLM_PROVIDER=anthropic` |
 | `ANTHROPIC_MODEL` | Override the Claude model. Default `claude-haiku-4-5-20251001`. | optional |
+
+Do not set `B2_ENDPOINT`; the API derives the S3-compatible endpoint from
+`B2_REGION` automatically.
+
+For rolling upgrades from older deployments, add the standardized B2 variables
+above alongside any legacy key-id or endpoint variables before deploying this
+version. Remove legacy variables only after all old API instances are drained.
 
 Set this on the Web service:
 
