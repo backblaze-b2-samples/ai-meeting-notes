@@ -68,12 +68,13 @@ Open `.env` in your editor. Then head to the [Backblaze B2 dashboard](https://se
 
 1. **Create a bucket.** B2 will show three values — paste each into `.env`:
    - **Bucket Unique Name** -> `B2_BUCKET_NAME`
-   - **Endpoint** -> `B2_ENDPOINT`
-   - **Region** (the path segment of the endpoint, e.g. `us-west-004`) -> `B2_REGION`
+   - **Region** (for example, `us-west-004`) -> `B2_REGION`
 2. **Create an application key** with `Read and Write` permission. Paste into `.env`:
-   - **keyID** -> `B2_KEY_ID`
+   - **keyID** -> `B2_APPLICATION_KEY_ID`
    - **applicationKey** -> `B2_APPLICATION_KEY` *(only shown once — paste it now)*
-3. **Add your transcription + LLM keys** to `.env`:
+3. **Optional public URLs**: if your bucket is public or fronted by a CDN, set
+   `B2_PUBLIC_URL_BASE`; otherwise leave it blank and the app uses presigned URLs.
+4. **Add your transcription + LLM keys** to `.env`:
    - `ASSEMBLYAI_API_KEY` for transcription (<https://www.assemblyai.com/app/account>)
    - `OPENAI_API_KEY` for summary + action-item extraction (<https://platform.openai.com/api-keys>)
    - To use Anthropic Claude instead, uncomment the Anthropic block in `.env` and provide `ANTHROPIC_API_KEY` (<https://console.anthropic.com/>)

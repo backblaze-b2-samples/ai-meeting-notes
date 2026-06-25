@@ -24,11 +24,11 @@ Set these on the API service:
 
 | Variable | Value | Required |
 |----------|-------|----------|
-| `B2_ENDPOINT` | Your B2 S3 endpoint | required |
-| `B2_REGION` | Your B2 region (the path segment of the endpoint, e.g. `us-west-004`) | required |
-| `B2_KEY_ID` | Your B2 key ID | required |
+| `B2_REGION` | Your B2 region, e.g. `us-west-004` | required |
+| `B2_APPLICATION_KEY_ID` | Your B2 key ID | required |
 | `B2_APPLICATION_KEY` | Your B2 key | required |
 | `B2_BUCKET_NAME` | Your bucket name | required |
+| `B2_PUBLIC_URL_BASE` | Public bucket or CDN base URL | optional |
 | `API_CORS_ORIGINS` | Your web service URL (e.g., `https://web-production-xxx.up.railway.app`) | required |
 | `ASSEMBLYAI_API_KEY` | AssemblyAI key — used for diarized transcription. | required |
 | `LLM_PROVIDER` | LLM provider for summary + action-item extraction. Default `openai`; alt `anthropic`. | optional |

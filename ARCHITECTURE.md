@@ -13,7 +13,7 @@
   - Dark mode via `next-themes`
 - **services/api/** — FastAPI backend (layered architecture)
   - REST API for meetings (create / list / get / delete), pipeline status, transcript / summary / actions reads, presigned playback + download, and cross-meeting search
-  - B2 S3 integration via boto3 (single cached client with `user_agent_extra="b2ai-ai-meeting-notes"`)
+  - B2 S3 integration via boto3 (single cached client with `user_agent_extra="b2ai-ai-meeting-notes (backblaze-b2-samples)"`)
   - Transcription via AssemblyAI (diarized), behind a `repo/transcription.py` adapter
   - LLM via OpenAI (JSON-schema structured outputs, default) or Anthropic Claude (tool-use), selectable with `LLM_PROVIDER`, behind a `repo/llm.py` adapter
   - Pipeline orchestration via FastAPI `BackgroundTasks` — ASR -> summary -> actions
@@ -86,7 +86,7 @@ services/api/
 - **No raw dicts at boundaries**: All data crossing layer boundaries uses typed Pydantic models. The repo adapters convert SDK objects into dicts before crossing into service/.
 - **No mutable globals**: Configuration is read-only after init.
 - **Validated inputs**: All HTTP inputs validated by FastAPI/Pydantic. Meeting ids validated against `^[A-Za-z0-9_-]{6,64}$` (see `repo/meetings_store.py::MEETING_ID_RE`) with explicit `..` / `/` rejection before any B2 call.
-- **Custom user agent**: every `boto3.client("s3", …)` sets `Config(user_agent_extra="b2ai-ai-meeting-notes", signature_version="s3v4")`. No `b2-native` calls.
+- **Custom user agent**: every `boto3.client("s3", …)` sets `Config(user_agent_extra="b2ai-ai-meeting-notes (backblaze-b2-samples)", signature_version="s3v4")`. No `b2-native` calls.
 
 ## Deployment
 
