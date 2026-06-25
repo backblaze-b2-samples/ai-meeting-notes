@@ -2,7 +2,22 @@ import re
 
 from pydantic_settings import BaseSettings
 
-B2_REGION_RE = re.compile(r"^[a-z]{2}(?:-[a-z]+)+-\d{3}$")
+B2_REQUIRED_SETTINGS = (
+    ("b2_application_key_id", "B2_APPLICATION_KEY_ID"),
+    ("b2_application_key", "B2_APPLICATION_KEY"),
+    ("b2_bucket_name", "B2_BUCKET_NAME"),
+    ("b2_region", "B2_REGION"),
+)
+B2_PLACEHOLDER_VALUES = frozenset(
+    {
+        "your_b2_region",
+        "your_application_key_id",
+        "your_application_key",
+        "your-bucket-name",
+    }
+)
+B2_REGION_PATTERN = r"^[a-z]{2}(?:-[a-z]+)+-\d{3}$"
+B2_REGION_RE = re.compile(B2_REGION_PATTERN)
 
 
 def validate_b2_region(region: str) -> str:

@@ -9,11 +9,18 @@
 // Run directly:  node scripts/doctor.mjs
 // Run via pnpm:  pnpm doctor
 
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync } from "node:fs";
 import { createServer } from "node:net";
 import { execSync } from "node:child_process";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import {
+  B2_REGION_PATTERN,
+  B2_ROLLING_MIGRATION_FIX,
+  PLACEHOLDERS,
+  REQUIRED_B2_VARS,
+  parseEnvFile,
+} from "./doctor-env.mjs";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const ENV_FILE = resolve(REPO_ROOT, ".env");
@@ -23,28 +30,6 @@ const VENV_UVICORN = resolve(REPO_ROOT, "services/api/.venv/bin/uvicorn");
 const REQUIRED_NODE_MAJOR = 20;
 const REQUIRED_PNPM_MAJOR = 9;
 const REQUIRED_PYTHON_MINOR = 11; // 3.11+
-
-// Required B2 env vars + the exact placeholder strings shipped in
-// .env.example. Keep in sync with services/api/main.py REQUIRED_B2_SETTINGS
-// and PLACEHOLDER_VALUES.
-const REQUIRED_B2_VARS = [
-  "B2_REGION",
-  "B2_APPLICATION_KEY_ID",
-  "B2_APPLICATION_KEY",
-  "B2_BUCKET_NAME",
-];
-const PLACEHOLDERS = new Set([
-  "your_b2_region",
-  "your_application_key_id",
-  "your_application_key",
-  "your-bucket-name",
-]);
-const B2_REGION_PATTERN = /^[a-z]{2}(?:-[a-z]+)+-\d{3}$/;
-const B2_ROLLING_MIGRATION_FIX = [
-  "For rolling upgrades from legacy B2 env names, add the standardized",
-  "variables alongside the legacy key-id/endpoint variables before deploying;",
-  "remove legacy variables only after old API instances are drained.",
-].join(" ");
 
 // Only Next.js: `pnpm dev` self-heals the API side via scripts/pick-port.mjs,
 // so warning about 8000 here would just duplicate dev.sh's own banner.
@@ -146,26 +131,6 @@ function checkVenv() {
       "Run: `cd services/api && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt && cd ../..`",
     );
   }
-}
-
-function parseEnvFile(path) {
-  // Minimal .env parser — enough for KEY=value lines, ignores comments
-  // and quoted strings. We don't need the full dotenv grammar here.
-  const out = {};
-  const text = readFileSync(path, "utf8");
-  for (const raw of text.split("\n")) {
-    const line = raw.trim();
-    if (!line || line.startsWith("#")) continue;
-    const eq = line.indexOf("=");
-    if (eq === -1) continue;
-    const key = line.slice(0, eq).trim();
-    let val = line.slice(eq + 1).trim();
-    if ((val.startsWith('"') && val.endsWith('"')) || (val.startsWith("'") && val.endsWith("'"))) {
-      val = val.slice(1, -1);
-    }
-    out[key] = val;
-  }
-  return out;
 }
 
 function checkEnv() {

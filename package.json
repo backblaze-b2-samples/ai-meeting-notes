@@ -3,6 +3,7 @@
   "private": true,
   "scripts": {
     "doctor": "node scripts/doctor.mjs",
+    "test:doctor": "node --test scripts/doctor-env.test.mjs",
     "predev": "node scripts/doctor.mjs",
     "dev": "sh scripts/dev.sh",
     "dev:web": "pnpm --filter @ai-meeting-notes/web dev",

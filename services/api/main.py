@@ -17,7 +17,12 @@ from fastapi import FastAPI  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from starlette.middleware.base import BaseHTTPMiddleware  # noqa: E402
 
-from app.config import settings, validate_b2_region  # noqa: E402
+from app.config import (  # noqa: E402
+    B2_PLACEHOLDER_VALUES,
+    B2_REQUIRED_SETTINGS,
+    settings,
+    validate_b2_region,
+)
 from app.runtime import files, health, meetings, metrics, search, upload  # noqa: E402
 
 # --- Startup validation ---
@@ -27,22 +32,6 @@ from app.runtime import files, health, meetings, metrics, search, upload  # noqa
 # with a human-readable message — uvicorn surfaces this as the first log
 # line, so misconfiguration is obvious within seconds rather than turning
 # into mysterious 500s on the first request.
-REQUIRED_B2_SETTINGS = (
-    ("b2_application_key_id", "B2_APPLICATION_KEY_ID"),
-    ("b2_application_key", "B2_APPLICATION_KEY"),
-    ("b2_bucket_name", "B2_BUCKET_NAME"),
-    ("b2_region", "B2_REGION"),
-)
-
-# Exact placeholder strings shipped in .env.example. If a user copied
-# the example and didn't edit it, Settings will pass the "non-empty"
-# check above but every B2 call will still 403. Catch that here.
-PLACEHOLDER_VALUES = frozenset({
-    "your_b2_region",
-    "your_application_key_id",
-    "your_application_key",
-    "your-bucket-name",
-})
 ROLLING_B2_MIGRATION_HELP = (
     "For rolling upgrades from legacy B2 env names, add the standardized "
     "variables alongside the legacy key-id/endpoint variables before "
@@ -53,11 +42,7 @@ ROLLING_B2_MIGRATION_HELP = (
 
 @asynccontextmanager
 async def lifespan(_app: "FastAPI"):
-    missing = [
-        env_name
-        for attr, env_name in REQUIRED_B2_SETTINGS
-        if not getattr(settings, attr)
-    ]
+    missing = [env_name for attr, env_name in B2_REQUIRED_SETTINGS if not getattr(settings, attr)]
     if missing:
         raise RuntimeError(
             "Missing required B2 configuration: "
@@ -68,8 +53,8 @@ async def lifespan(_app: "FastAPI"):
 
     placeholders = [
         env_name
-        for attr, env_name in REQUIRED_B2_SETTINGS
-        if getattr(settings, attr) in PLACEHOLDER_VALUES
+        for attr, env_name in B2_REQUIRED_SETTINGS
+        if getattr(settings, attr) in B2_PLACEHOLDER_VALUES
     ]
     if placeholders:
         raise RuntimeError(
@@ -84,7 +69,9 @@ async def lifespan(_app: "FastAPI"):
         raise RuntimeError(f"{exc} {ROLLING_B2_MIGRATION_HELP}") from exc
     yield
 
+
 # --- Structured JSON logging ---
+
 
 class JSONFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:

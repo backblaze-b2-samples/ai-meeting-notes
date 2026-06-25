@@ -12,6 +12,10 @@ from app.config import settings
 from app.types import FileMetadata
 from app.types.formatting import humanize_bytes
 
+B2_CONNECT_TIMEOUT_SECONDS = 3
+B2_READ_TIMEOUT_SECONDS = 30
+B2_TOTAL_MAX_ATTEMPTS = 3
+
 
 def _guess_content_type(key: str) -> str:
     mime, _ = mimetypes.guess_type(key)
@@ -38,9 +42,7 @@ def _public_url(key: str) -> str | None:
 def get_s3_client():
     endpoint_url = settings.b2_s3_endpoint
     if not endpoint_url:
-        raise RuntimeError(
-            "B2_REGION is required before creating the B2 S3 client."
-        )
+        raise RuntimeError("B2_REGION is required before creating the B2 S3 client.")
     return boto3.client(
         "s3",
         endpoint_url=endpoint_url,
@@ -48,6 +50,12 @@ def get_s3_client():
         aws_access_key_id=settings.b2_application_key_id,
         aws_secret_access_key=settings.b2_application_key,
         config=Config(
+            connect_timeout=B2_CONNECT_TIMEOUT_SECONDS,
+            read_timeout=B2_READ_TIMEOUT_SECONDS,
+            retries={
+                "mode": "standard",
+                "total_max_attempts": B2_TOTAL_MAX_ATTEMPTS,
+            },
             signature_version="s3v4",
             user_agent_extra="b2ai-ai-meeting-notes (backblaze-b2-samples)",
         ),
@@ -135,9 +143,7 @@ def list_files(prefix: str = "", max_keys: int = 1000) -> list[FileMetadata]:
 def get_file_metadata(key: str) -> FileMetadata | None:
     client = get_s3_client()
     try:
-        response = client.head_object(
-            Bucket=settings.b2_bucket_name, Key=key
-        )
+        response = client.head_object(Bucket=settings.b2_bucket_name, Key=key)
     except ClientError as e:
         # Only treat 404/NoSuchKey as "not found"; re-raise other errors
         code = e.response.get("Error", {}).get("Code", "")
@@ -204,9 +210,7 @@ def delete_files_batch(keys: list[str]) -> tuple[list[str], list[dict]]:
     return deleted, errors
 
 
-def get_presigned_url(
-    key: str, filename: str | None = None, expires_in: int = 600
-) -> str:
+def get_presigned_url(key: str, filename: str | None = None, expires_in: int = 600) -> str:
     """Generate a presigned download URL. Raises RuntimeError on failure."""
     client = get_s3_client()
     params: dict = {"Bucket": settings.b2_bucket_name, "Key": key}
@@ -248,9 +252,7 @@ def get_upload_stats() -> dict:
 
     total_size = sum(obj["Size"] for obj in contents)
     today = datetime.now(UTC).date()
-    uploads_today = sum(
-        1 for obj in contents if obj["LastModified"].date() == today
-    )
+    uploads_today = sum(1 for obj in contents if obj["LastModified"].date() == today)
     return {
         "total_files": len(contents),
         "total_size_bytes": total_size,
