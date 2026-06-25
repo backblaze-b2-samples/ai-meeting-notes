@@ -21,13 +21,32 @@ logger = logging.getLogger(__name__)
 router = APIRouter()
 
 
+def _parse_content_length(header: str | None) -> int | None:
+    if header is None:
+        return None
+
+    try:
+        content_length = int(header)
+    except ValueError:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid Content-Length header",
+        ) from None
+
+    if content_length < 0:
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid Content-Length header",
+        )
+    return content_length
+
+
 @router.post("/upload", response_model=FileUploadResponse)
 async def upload(
     background_tasks: BackgroundTasks, request: Request, file: UploadFile
 ):
     content_type = file.content_type or "application/octet-stream"
-    content_length_header = request.headers.get("content-length")
-    content_length = int(content_length_header) if content_length_header else None
+    content_length = _parse_content_length(request.headers.get("content-length"))
 
     chunks: list[bytes] = []
     total = 0
