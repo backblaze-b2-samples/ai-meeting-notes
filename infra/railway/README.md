@@ -37,6 +37,9 @@ Set these on the API service:
 | `ANTHROPIC_API_KEY` | Anthropic key — used for summary + action-item extraction when `LLM_PROVIDER=anthropic`. | required when `LLM_PROVIDER=anthropic` |
 | `ANTHROPIC_MODEL` | Override the Claude model. Default `claude-haiku-4-5-20251001`. | optional |
 
+Do not set `B2_ENDPOINT`; the API derives the S3-compatible endpoint from
+`B2_REGION` automatically.
+
 For rolling upgrades from older deployments, add the standardized B2 variables
 above alongside any legacy key-id or endpoint variables before deploying this
 version. Remove legacy variables only after all old API instances are drained.

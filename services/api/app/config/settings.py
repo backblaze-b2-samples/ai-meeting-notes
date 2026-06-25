@@ -1,4 +1,5 @@
 import re
+from functools import cached_property
 
 from pydantic_settings import BaseSettings
 
@@ -70,7 +71,7 @@ class Settings(BaseSettings):
     def cors_origins(self) -> list[str]:
         return [o.strip() for o in self.api_cors_origins.split(",")]
 
-    @property
+    @cached_property
     def b2_s3_endpoint(self) -> str | None:
         if not self.b2_region:
             return None
