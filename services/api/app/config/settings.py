@@ -16,6 +16,12 @@ B2_PLACEHOLDER_VALUES = frozenset(
         "your-bucket-name",
     }
 )
+B2_ROLLING_MIGRATION_HELP = (
+    "For rolling upgrades from legacy B2 env names, add the standardized "
+    "variables alongside the legacy key-id/endpoint variables before "
+    "deploying this release; remove legacy variables only after old API "
+    "instances are drained."
+)
 B2_REGION_PATTERN = r"^[a-z]{2}(?:-[a-z]+)+-\d{3}$"
 B2_REGION_RE = re.compile(B2_REGION_PATTERN)
 

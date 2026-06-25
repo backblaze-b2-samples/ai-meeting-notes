@@ -18,7 +18,7 @@ export const B2_REGION_PATTERN = /^[a-z]{2}(?:-[a-z]+)+-\d{3}$/;
 
 export const B2_ROLLING_MIGRATION_FIX = [
   "For rolling upgrades from legacy B2 env names, add the standardized",
-  "variables alongside the legacy key-id/endpoint variables before deploying;",
+  "variables alongside the legacy key-id/endpoint variables before deploying this release;",
   "remove legacy variables only after old API instances are drained.",
 ].join(" ");
 
