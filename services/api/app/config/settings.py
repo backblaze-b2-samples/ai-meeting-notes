@@ -1,4 +1,17 @@
+import re
+
 from pydantic_settings import BaseSettings
+
+B2_REGION_RE = re.compile(r"^[a-z]{2}(?:-[a-z]+)+-\d{3}$")
+
+
+def validate_b2_region(region: str) -> str:
+    if not B2_REGION_RE.fullmatch(region):
+        raise ValueError(
+            "B2_REGION must match Backblaze's region format: lowercase "
+            "letters and hyphens followed by a three-digit shard."
+        )
+    return region
 
 
 class Settings(BaseSettings):
@@ -40,7 +53,8 @@ class Settings(BaseSettings):
     def b2_s3_endpoint(self) -> str | None:
         if not self.b2_region:
             return None
-        return f"https://s3.{self.b2_region}.backblazeb2.com"
+        region = validate_b2_region(self.b2_region)
+        return f"https://s3.{region}.backblazeb2.com"
 
 
 settings = Settings()

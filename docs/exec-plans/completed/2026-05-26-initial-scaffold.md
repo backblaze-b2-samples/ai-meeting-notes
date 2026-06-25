@@ -124,9 +124,13 @@ plumbing rather than rebuild it.
 
 **Env vars (`.env.example`)**
 
+> Historical note: issue #2 superseded this initial scaffold contract with the
+> current B2 standards. See
+> `docs/exec-plans/completed/2026-06-25-b2-standards-issue-2.md`.
+
 Kept from starter:
 ```
-B2_REGION, B2_APPLICATION_KEY_ID, B2_APPLICATION_KEY, B2_BUCKET_NAME, B2_PUBLIC_URL_BASE
+B2_ENDPOINT, B2_REGION, B2_KEY_ID, B2_APPLICATION_KEY, B2_BUCKET_NAME, B2_PUBLIC_URL
 ```
 
 Added:
@@ -190,7 +194,7 @@ same client.
 
 **No b2-native usage.** **All `boto3.client("s3", …)` calls go through
 the cached factory in `repo/b2_client.py`, which sets
-`Config(user_agent_extra="b2ai-ai-meeting-notes (backblaze-b2-samples)", signature_version="s3v4")`**.
+`Config(user_agent_extra="b2ai-ai-meeting-notes", signature_version="s3v4")`**.
 
 ---
 
@@ -260,7 +264,7 @@ the cached factory in `repo/b2_client.py`, which sets
 | pnpm workspace name (shared) | `@ai-audio-starter-kit/shared` | `@ai-meeting-notes/shared` |
 | Title case in docs / UI | "AI Audio Starter Kit" | "AI Meeting Notes" |
 | Tagline | "Build AI audio applications…" | "Record, transcribe, summarize, and search your meetings — stored on Backblaze B2" |
-| `user_agent_extra` value | `b2ai-ai-audio-starter-kit` | `b2ai-ai-meeting-notes (backblaze-b2-samples)` |
+| `user_agent_extra` value | `b2ai-ai-audio-starter-kit` | `b2ai-ai-meeting-notes` |
 | UTM `utm_content` query param | `b2ai-ai-audio-starter-kit` | `b2ai-ai-meeting-notes` |
 | Railway service slugs in `infra/railway/` | `ai-audio-starter-kit-*` | `ai-meeting-notes-*` |
 | Docker image tag references (if any in infra) | `ai-audio-starter-kit:*` | `ai-meeting-notes:*` |
@@ -330,7 +334,7 @@ Each gets a stub exec-plan so the path is discoverable.
 7. **Verify parent-CLAUDE.md standards** before commit:
    - S3 API only, no b2-native calls
    - Every `boto3.client("s3", …)` sets
-     `user_agent_extra="b2ai-ai-meeting-notes (backblaze-b2-samples)"`
+     `user_agent_extra="b2ai-ai-meeting-notes"`
    - All env vars named `B2_*` for B2 config; provider keys live in their
      own `ASSEMBLYAI_API_KEY` / `OPENAI_API_KEY` / `ANTHROPIC_API_KEY`
      namespace

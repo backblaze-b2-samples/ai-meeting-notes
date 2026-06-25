@@ -66,7 +66,7 @@ cp .env.example .env
 
 Open `.env` in your editor. Then head to the [Backblaze B2 dashboard](https://secure.backblaze.com/b2_buckets.htm?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=b2ai-ai-meeting-notes) and:
 
-1. **Create a bucket.** B2 will show three values — paste each into `.env`:
+1. **Create a bucket.** B2 will show two values — paste each into `.env`:
    - **Bucket Unique Name** -> `B2_BUCKET_NAME`
    - **Region** (for example, `us-west-004`) -> `B2_REGION`
 2. **Create an application key** with `Read and Write` permission. Paste into `.env`:
@@ -78,6 +78,11 @@ Open `.env` in your editor. Then head to the [Backblaze B2 dashboard](https://se
    - `ASSEMBLYAI_API_KEY` for transcription (<https://www.assemblyai.com/app/account>)
    - `OPENAI_API_KEY` for summary + action-item extraction (<https://platform.openai.com/api-keys>)
    - To use Anthropic Claude instead, uncomment the Anthropic block in `.env` and provide `ANTHROPIC_API_KEY` (<https://console.anthropic.com/>)
+
+Rolling upgrade note: if an existing deployment still uses the legacy
+`B2_KEY_ID` / `B2_ENDPOINT` names, add the standardized variables above
+alongside the legacy variables before deploying this version. After every old
+API instance is drained, remove the legacy variables.
 
 > Walkthrough? See [creating a bucket](https://www.backblaze.com/docs/cloud-storage-create-and-manage-buckets?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=b2ai-ai-meeting-notes) and [creating app keys](https://www.backblaze.com/docs/cloud-storage-create-and-manage-app-keys?utm_source=github&utm_medium=referral&utm_campaign=ai_artifacts&utm_content=b2ai-ai-meeting-notes).
 

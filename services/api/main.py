@@ -17,7 +17,7 @@ from fastapi import FastAPI  # noqa: E402
 from fastapi.middleware.cors import CORSMiddleware  # noqa: E402
 from starlette.middleware.base import BaseHTTPMiddleware  # noqa: E402
 
-from app.config import settings  # noqa: E402
+from app.config import settings, validate_b2_region  # noqa: E402
 from app.runtime import files, health, meetings, metrics, search, upload  # noqa: E402
 
 # --- Startup validation ---
@@ -43,6 +43,12 @@ PLACEHOLDER_VALUES = frozenset({
     "your_application_key",
     "your-bucket-name",
 })
+ROLLING_B2_MIGRATION_HELP = (
+    "For rolling upgrades from legacy B2 env names, add the standardized "
+    "variables alongside the legacy key-id/endpoint variables before "
+    "deploying this release; remove legacy variables only after old API "
+    "instances are drained."
+)
 
 
 @asynccontextmanager
@@ -56,7 +62,8 @@ async def lifespan(_app: "FastAPI"):
         raise RuntimeError(
             "Missing required B2 configuration: "
             + ", ".join(missing)
-            + f". Add them to {REPO_ROOT_ENV} (see .env.example) and restart."
+            + f". Add them to {REPO_ROOT_ENV} (see .env.example) and restart. "
+            + ROLLING_B2_MIGRATION_HELP
         )
 
     placeholders = [
@@ -70,6 +77,11 @@ async def lifespan(_app: "FastAPI"):
             + ", ".join(placeholders)
             + f". Edit {REPO_ROOT_ENV} with your real B2 credentials and restart."
         )
+
+    try:
+        validate_b2_region(settings.b2_region)
+    except ValueError as exc:
+        raise RuntimeError(f"{exc} {ROLLING_B2_MIGRATION_HELP}") from exc
     yield
 
 # --- Structured JSON logging ---
