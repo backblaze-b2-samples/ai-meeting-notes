@@ -15,6 +15,7 @@ from app.runtime.metrics import record_upload
 from app.service.meeting import run_pipeline
 from app.service.upload import UploadError, process_meeting_upload
 from app.types import FileUploadResponse
+from app.types.formatting import humanize_bytes
 
 logger = logging.getLogger(__name__)
 
@@ -24,6 +25,14 @@ router = APIRouter()
 INVALID_CONTENT_LENGTH = "Invalid Content-Length header"
 
 
+def _content_length_exceeds_max(header: str) -> bool:
+    normalized = header.lstrip("0") or "0"
+    max_size = str(settings.max_file_size)
+    return len(normalized) > len(max_size) or (
+        len(normalized) == len(max_size) and normalized > max_size
+    )
+
+
 def _parse_content_length(header: str | None) -> int | None:
     if header is None:
         return None
@@ -31,7 +40,14 @@ def _parse_content_length(header: str | None) -> int | None:
     if not header.isascii() or not header.isdigit():
         raise UploadError(INVALID_CONTENT_LENGTH)
 
-    return int(header)
+    normalized = header.lstrip("0") or "0"
+    if _content_length_exceeds_max(normalized):
+        raise UploadError(
+            f"File too large. Max size: {humanize_bytes(settings.max_file_size)}",
+            status_code=413,
+        )
+
+    return int(normalized)
 
 
 def _reject_upload(error: UploadError) -> None:

@@ -93,3 +93,18 @@ async def test_upload_rejects_invalid_content_length(
     assert payload == {"detail": "Invalid Content-Length header"}
     assert after_errors == before_errors + 1
     assert "Upload rejected: Invalid Content-Length header" in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_upload_rejects_very_large_content_length(client, caplog):
+    before_errors = await _upload_errors_total(client)
+    caplog.clear()
+
+    with caplog.at_level(logging.WARNING, logger="app.runtime.upload"):
+        status, payload = await _post_upload_with_content_length("9" * 5000)
+
+    after_errors = await _upload_errors_total(client)
+    assert status == 413
+    assert payload["detail"].startswith("File too large. Max size:")
+    assert after_errors == before_errors + 1
+    assert "Upload rejected: File too large." in caplog.text
