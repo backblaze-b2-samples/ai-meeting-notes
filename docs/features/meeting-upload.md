@@ -1,4 +1,4 @@
-<!-- last_verified: 2026-05-27 -->
+<!-- last_verified: 2026-06-25 -->
 # Feature: Meeting Upload
 
 ## Purpose
@@ -40,6 +40,7 @@ Accept a meeting recording (audio or video), durably persist it to B2 under a fr
 ## Edge Cases
 - Unsupported extension -> 415 with detail, no B2 write
 - Empty file -> 400
+- Malformed `Content-Length` on legacy `/upload` -> 400, no B2 write
 - File > 100MB -> 413 with size detail
 - B2 write failure -> 502 with the underlying error (no pipeline kicked)
 - Pipeline failure -> `status.json` marked `failed`, recording is preserved for re-upload / retry
@@ -50,8 +51,8 @@ Accept a meeting recording (audio or video), durably persist it to B2 under a fr
 - Error: red status icon + toast with the API's detail message
 
 ## Verification
-- Test files: `services/api/tests/test_meetings.py`, `services/api/tests/test_structure.py`
-- Required cases: happy path; bad extension; empty file; meeting id validation
+- Test files: `services/api/tests/test_meetings.py`, `services/api/tests/test_upload.py`, `services/api/tests/test_structure.py`
+- Required cases: happy path; bad extension; empty file; malformed `Content-Length`; meeting id validation
 - Quick verify command: `pnpm test:api`
 - Full verify command: `pnpm lint:api && pnpm test:api && pnpm check:structure`
 - Pass criteria: meetings list endpoint returns the new row immediately after POST; status.json exists with `state=queued`
