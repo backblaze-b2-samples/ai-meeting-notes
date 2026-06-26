@@ -13,9 +13,8 @@ from fastapi import APIRouter, BackgroundTasks, HTTPException, Request, UploadFi
 from app.config import settings
 from app.runtime.metrics import record_upload
 from app.service.meeting import run_pipeline
-from app.service.upload import UploadError, process_meeting_upload
+from app.service.upload import UploadError, file_too_large_detail, process_meeting_upload
 from app.types import FileUploadResponse
-from app.types.formatting import humanize_bytes
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +26,7 @@ INVALID_CONTENT_LENGTH = "Invalid Content-Length header"
 
 def _file_too_large_error() -> UploadError:
     return UploadError(
-        f"File too large. Max size: {humanize_bytes(settings.max_file_size)}",
+        file_too_large_detail(),
         status_code=413,
     )
 

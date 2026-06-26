@@ -57,6 +57,10 @@ class UploadError(Exception):
         super().__init__(detail)
 
 
+def file_too_large_detail() -> str:
+    return f"File too large. Max size: {humanize_bytes(settings.max_file_size)}"
+
+
 def process_meeting_upload(
     file_data: bytes,
     filename: str,
@@ -76,7 +80,7 @@ def process_meeting_upload(
 
     if content_length and content_length > settings.max_file_size:
         raise UploadError(
-            f"File too large. Max size: {humanize_bytes(settings.max_file_size)}",
+            file_too_large_detail(),
             status_code=413,
         )
 
@@ -99,7 +103,7 @@ def process_meeting_upload(
         raise UploadError("Empty file")
     if len(file_data) > settings.max_file_size:
         raise UploadError(
-            f"File too large. Max size: {humanize_bytes(settings.max_file_size)}",
+            file_too_large_detail(),
             status_code=413,
         )
 

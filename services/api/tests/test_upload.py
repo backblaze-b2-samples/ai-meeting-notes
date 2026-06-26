@@ -60,7 +60,7 @@ async def _post_upload_with_content_length(
     async def receive():
         nonlocal sent_body
         if sent_body:
-            return {"type": "http.disconnect"}
+            return {"type": "http.request", "body": b"", "more_body": False}
         sent_body = True
         return {"type": "http.request", "body": body, "more_body": False}
 
