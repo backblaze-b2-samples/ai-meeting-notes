@@ -25,6 +25,13 @@ router = APIRouter()
 INVALID_CONTENT_LENGTH = "Invalid Content-Length header"
 
 
+def _file_too_large_error() -> UploadError:
+    return UploadError(
+        f"File too large. Max size: {humanize_bytes(settings.max_file_size)}",
+        status_code=413,
+    )
+
+
 def _content_length_exceeds_max(header: str) -> bool:
     normalized = header.lstrip("0") or "0"
     max_size = str(settings.max_file_size)
@@ -42,10 +49,7 @@ def _parse_content_length(header: str | None) -> int | None:
 
     normalized = header.lstrip("0") or "0"
     if _content_length_exceeds_max(normalized):
-        raise UploadError(
-            f"File too large. Max size: {humanize_bytes(settings.max_file_size)}",
-            status_code=413,
-        )
+        raise _file_too_large_error()
 
     return int(normalized)
 
@@ -75,7 +79,7 @@ async def upload(
                 break
             total += len(chunk)
             if total > settings.max_file_size:
-                raise HTTPException(status_code=413, detail="File too large")
+                raise _file_too_large_error()
             chunks.append(chunk)
         file_data = b"".join(chunks)
 

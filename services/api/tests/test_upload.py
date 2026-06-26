@@ -5,6 +5,7 @@ import logging
 
 import pytest
 
+from app.config import settings
 from main import app
 
 
@@ -17,17 +18,29 @@ async def _upload_errors_total(client) -> int:
     raise AssertionError("upload_errors_total metric not found")
 
 
-async def _post_upload_with_content_length(header: str) -> tuple[int, dict]:
+async def _post_upload_with_content_length(
+    header: str | None,
+    file_data: bytes = b"audio",
+) -> tuple[int, dict]:
     boundary = "pytest-upload-boundary"
-    body = (
+    prefix = (
         f"--{boundary}\r\n"
         'Content-Disposition: form-data; name="file"; filename="meeting.mp3"\r\n'
         "Content-Type: audio/mpeg\r\n\r\n"
-        "audio\r\n"
-        f"--{boundary}--\r\n"
     ).encode()
+    suffix = f"\r\n--{boundary}--\r\n".encode()
+    body = prefix + file_data + suffix
     sent_body = False
     messages = []
+    headers = [
+        (b"host", b"test"),
+        (
+            b"content-type",
+            f"multipart/form-data; boundary={boundary}".encode("ascii"),
+        ),
+    ]
+    if header is not None:
+        headers.insert(1, (b"content-length", header.encode("ascii")))
 
     scope = {
         "type": "http",
@@ -38,14 +51,7 @@ async def _post_upload_with_content_length(header: str) -> tuple[int, dict]:
         "path": "/upload",
         "raw_path": b"/upload",
         "query_string": b"",
-        "headers": [
-            (b"host", b"test"),
-            (b"content-length", header.encode("ascii")),
-            (
-                b"content-type",
-                f"multipart/form-data; boundary={boundary}".encode("ascii"),
-            ),
-        ],
+        "headers": headers,
         "client": ("testclient", 50000),
         "server": ("testserver", 80),
         "root_path": "",
@@ -108,3 +114,24 @@ async def test_upload_rejects_very_large_content_length(client, caplog):
     assert payload["detail"].startswith("File too large. Max size:")
     assert after_errors == before_errors + 1
     assert "Upload rejected: File too large." in caplog.text
+
+
+@pytest.mark.asyncio
+async def test_upload_records_streamed_file_size_rejection(
+    client, caplog, monkeypatch
+):
+    monkeypatch.setattr(settings, "max_file_size", 3)
+    before_errors = await _upload_errors_total(client)
+    caplog.clear()
+
+    with caplog.at_level(logging.WARNING, logger="app.runtime.upload"):
+        status, payload = await _post_upload_with_content_length(
+            None,
+            file_data=b"audio",
+        )
+
+    after_errors = await _upload_errors_total(client)
+    assert status == 413
+    assert payload == {"detail": "File too large. Max size: 3.0 B"}
+    assert after_errors == before_errors + 1
+    assert "Upload rejected: File too large. Max size: 3.0 B" in caplog.text
