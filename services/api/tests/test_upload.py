@@ -19,7 +19,7 @@ async def _upload_errors_total(client) -> int:
 
 
 async def _post_upload_with_content_length(
-    header: str | None,
+    header: str | bytes | None,
     file_data: bytes = b"audio",
 ) -> tuple[int, dict]:
     boundary = "pytest-upload-boundary"
@@ -39,7 +39,9 @@ async def _post_upload_with_content_length(
             f"multipart/form-data; boundary={boundary}".encode("ascii"),
         ),
     ]
-    if header is not None:
+    if isinstance(header, bytes):
+        headers.insert(1, (b"content-length", header))
+    elif header is not None:
         headers.insert(1, (b"content-length", header.encode("ascii")))
 
     scope = {
@@ -83,7 +85,7 @@ async def _post_upload_with_content_length(
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "content_length",
-    ["bad-value", "+5", " 5", "5 ", "1_000", "-0", "-1"],
+    ["bad-value", "+5", " 5", "5 ", "1_000", "-0", "-1", b"\xff"],
 )
 async def test_upload_rejects_invalid_content_length(
     client, caplog, content_length
