@@ -43,6 +43,8 @@ def test_b2_env_contract_has_drift_guard():
     doctor_env_source = (REPO_ROOT / "scripts/doctor-env.mjs").read_text()
     env_example_source = (REPO_ROOT / ".env.example").read_text()
     required_env_names = {env_name for _, env_name in B2_REQUIRED_SETTINGS}
+    optional_env_names = _extract_js_strings(doctor_env_source, "OPTIONAL_B2_VARS")
+    standard_env_names = required_env_names | optional_env_names
 
     env_example_values = {}
     for raw in env_example_source.splitlines():
@@ -50,22 +52,22 @@ def test_b2_env_contract_has_drift_guard():
         if not line.startswith("B2_") or "=" not in line:
             continue
         key, value = line.split("=", 1)
-        if key in required_env_names:
-            env_example_values[key] = value
+        env_example_values[key] = value
 
     assert api_main.B2_REQUIRED_SETTINGS == B2_REQUIRED_SETTINGS
     assert api_main.B2_PLACEHOLDER_VALUES == B2_PLACEHOLDER_VALUES
     assert api_main.B2_ROLLING_MIGRATION_HELP == B2_ROLLING_MIGRATION_HELP
     assert 'from "./doctor-env.mjs"' in doctor_source
     assert _extract_js_strings(doctor_env_source, "REQUIRED_B2_VARS") == required_env_names
+    assert optional_env_names == {"B2_PUBLIC_URL_BASE"}
     assert _extract_js_strings(doctor_env_source, "PLACEHOLDERS") == set(B2_PLACEHOLDER_VALUES)
     assert _extract_js_regex(doctor_env_source, "B2_REGION_PATTERN") == B2_REGION_PATTERN
     assert (
         _extract_js_joined_strings(doctor_env_source, "B2_ROLLING_MIGRATION_FIX")
         == B2_ROLLING_MIGRATION_HELP
     )
-    assert set(env_example_values) == required_env_names
-    assert set(env_example_values.values()) == set(B2_PLACEHOLDER_VALUES)
+    assert set(env_example_values) == standard_env_names
+    assert set(env_example_values.values()) == set(B2_PLACEHOLDER_VALUES) | {""}
 
     example_region = re.search(r"^# B2_REGION=(\S+)$", env_example_source, re.MULTILINE)
     assert example_region
