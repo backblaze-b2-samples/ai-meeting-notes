@@ -7,6 +7,10 @@ export const REQUIRED_B2_VARS = [
   "B2_BUCKET_NAME",
 ];
 
+export const OPTIONAL_B2_VARS = [
+  "B2_PUBLIC_URL_BASE",
+];
+
 export const PLACEHOLDERS = new Set([
   "your_b2_region",
   "your_application_key_id",
